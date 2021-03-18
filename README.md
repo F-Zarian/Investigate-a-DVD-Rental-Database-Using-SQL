@@ -1,4 +1,4 @@
-# Investigate-a-DVD-Rental-Database-Using-SQL
+# Investigate a DVD Rental Database Using SQL
 
 ## Project Overview
 This project explores data from the DVD Rental Database. The database consisits of 14 tables 
