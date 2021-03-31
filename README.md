@@ -19,7 +19,7 @@ The DVD rental database represents the business processes of a DVD rental store.
 
 •	Downloaded the Movie database from [this page](https://www.postgresqltutorial.com/postgresql-sample-database/).
 
-•	Loaded the DVD Rental database into my PostgreSQL server on my machine using the PgAdmin tool. You will find the instructions to do so on the [following link](https://www.postgresqltutorial.com/load-postgresql-sample-database/).
+•	Loaded the DVD Rental database into my PostgreSQL server on my machine using the PgAdmin tool. You will find the instructions to do so on the [this link](https://www.postgresqltutorial.com/load-postgresql-sample-database/).
 
 • Connected back to the PostgreSQL server	
 
