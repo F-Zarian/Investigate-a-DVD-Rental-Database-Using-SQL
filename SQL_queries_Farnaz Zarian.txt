@@ -1,0 +1,143 @@
+/*Query 1- */
+
+SELECT f.title film_title, c.name AS category_name, COUNT(r.rental_date) rental_count
+   FROM film f
+   JOIN inventory i
+     ON i.film_id = f.film_id
+   JOIN rental r
+     ON i.inventory_id = r.inventory_id
+   JOIN film_category f_cat
+     ON f.film_id = f_cat.film_id
+   JOIN category c
+     ON f_cat.category_id = c.category_id
+ WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family')	
+ GROUP BY 1,2
+ ORDER BY 3 DESC;
+
+/*Query 2- */
+
+WITH t1 AS ( 
+           SELECT f.film_id film_id_1, 
+                  f.title film_title, 
+                  c.NAME category_name,
+		          f.rental_duration,
+		   NTILE(4) OVER (ORDER BY rental_duration) AS rental_duration_quartile 
+           FROM film f 
+           INNER JOIN film_category fc 
+           ON         f.film_id = fc.film_id 
+           INNER JOIN category c 
+           ON fc.category_id = c.category_id 
+           WHERE c.NAME IN ('Animation',
+							'Children',
+							'Classics',
+							'Comedy',
+							'Family',
+							'Music')), 
+	 t2 AS (
+           SELECT DISTINCT(i.film_id) film_id_2,
+		   Count(r.rental_id) OVER (partition BY i.film_id) rental_count 
+           FROM inventory i
+           INNER JOIN rental r 
+           ON i.inventory_id = r.inventory_id 
+           ORDER BY 1) 
+
+SELECT		t1.film_title,
+    		t1.category_name,
+    		t1.rental_duration,
+    		t1.rental_duration_quartile,
+    		t2.rental_count
+FROM		t1
+INNER JOIN	t2
+ON		t1.film_id_1 = t2.film_id_2
+ORDER BY	t1.rental_duration_quartile,
+    		t2.rental_count DESC;
+
+
+
+/*Query 3- */
+
+
+WITH quartiles AS (SELECT film_title, category, rental_duration,
+		NTILE(4) OVER (ORDER BY rental_duration) AS rental_duration_category
+     FROM
+		 (SELECT f.title film_title, c.name AS category, f.rental_duration rental_duration,
+		  NTILE(4) OVER (PARTITION BY c.name ORDER BY rental_duration)
+		   FROM film f
+		   JOIN film_category f_cat
+			 ON f.film_id = f_cat.film_id
+		   JOIN category c
+			 ON f_cat.category_id = c.category_id
+		  WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family')
+		 ORDER BY 2) t1)
+		 
+SELECT category, rental_duration_category, COUNT(*)
+FROM quartiles
+GROUP BY 1,2
+ORDER BY 2,3 DESC;
+
+/*Query 4- */
+
+SELECT DATE_PART('month', CAST(r.rental_date AS DATE)) rental_month,
+	   DATE_PART('year', CAST(r.rental_date AS DATE)) rental_year,
+	   s.store_id,
+	   COUNT(r.rental_date) count_rentals
+FROM rental r
+JOIN staff s 
+ON r.staff_id = s.staff_id
+JOIN store 
+ON s.store_id = store.store_id
+GROUP BY 1, 2, 3
+
+
+/*Query 5- */
+
+WITH top_paying AS (SELECT c.customer_id, SUM(p.amount) total_payment
+				   FROM customer c
+				   JOIN payment p
+				   ON c.customer_id = p.customer_id
+				   GROUP  BY 1
+				   ORDER BY 2 DESC
+				   LIMIT 10)
+
+SELECT DATE_TRUNC('month', p.payment_date) pay_month,
+		first_name || ' ' || last_name AS full_name,
+		COUNT(p.amount) AS pay_countpermon,
+		SUM(p.amount) AS pay_amt
+FROM top_paying 
+JOIN customer c 
+ON top_paying.customer_id = c.customer_id
+JOIN payment p
+ON c.customer_id = p.customer_id
+WHERE payment_date < '2008-01-01' AND payment_date >= '2007-01-01'
+GROUP BY 1,2
+ORDER BY 2,1;
+
+/*Query 6- */
+
+WITH top_paying AS (
+			SELECT c.customer_id, SUM(p.amount) total_payment
+		    FROM customer c
+			JOIN payment p
+			ON c.customer_id = p.customer_id
+			GROUP  BY 1
+			ORDER BY 2 DESC
+			LIMIT 10),
+			
+     table2 AS (
+	        SELECT DATE_TRUNC('month', p.payment_date) pay_month,
+			first_name || ' ' || last_name AS full_name,
+			SUM(p.amount) AS pay_amt
+			FROM top_paying 
+			JOIN customer c 
+			ON top_paying.customer_id = c.customer_id
+			JOIN payment p
+			ON c.customer_id = p.customer_id
+			WHERE payment_date < '2008-01-01' AND payment_date >= '2007-01-01'
+			GROUP BY 1,2)
+			
+SELECT *, LAG(pay_amt) OVER (PARTITION BY full_name ORDER BY pay_amt) AS lag,
+(pay_amt - COALESCE(LAG(pay_amt) OVER (PARTITION BY full_name ORDER BY pay_amt), 0)) AS diff
+FROM table2
+WHERE full_name IN ('Tommy Collazo','Rhonda Kennedy', 'Mike Way', 'Marion Snyder', 
+					'Marcia Dean', 'Karl Seal', 'Eleanor Hunt','Curtis Irby', 'Clara Shaw', 'Ana Bradley')
+ORDER BY diff DESC;
