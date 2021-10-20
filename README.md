@@ -50,6 +50,8 @@ The DVD rental database represents the business processes of a DVD rental store.
 
 
 # Technologies Used
+• PostgreSQL
+• pgAdmin 4
 
 
 # Resources
