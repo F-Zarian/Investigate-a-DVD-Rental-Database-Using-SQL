@@ -25,11 +25,11 @@ The DVD rental database represents the business processes of a DVD rental store.
 
 • Connected to the DVD rental database
 
-• Choose the DVD Rental database
+• Selected the DVD Rental database
 
 • Started running queries on the DVD rental database
 
-• After running several queries to get familiar with the data within the database, I answered 6 questions get a deeper insight into the company that rents the DVDs. 
+• After running several queries to get familiar with the data within the database, I answered 6 questions to get a deeper insight into the company that rents the DVDs. 
 
 ## Questions Proposed for Deeper Understanding of the Rental Business
 • What are the Top 20 films and categories families are watching based on rental count? (categories of considered family movies: Animation, Children, Classics, Comedy, Family and Music)
